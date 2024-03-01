@@ -1,26 +1,25 @@
 use ntex::web;
 
-#[web::get("/")]
-async fn hello() -> impl web::Responder {
-    web::HttpResponse::Ok().body("Ntex 1.1 is working properly")
-}
+mod handler;
 
-#[web::post("/echo")]
-async fn echo(req_body: String) -> impl web::Responder {
-    web::HttpResponse::Ok().body(req_body)
-}
-
-async fn manual_hello() -> impl web::Responder {
-    web::HttpResponse::Ok().body("Hey there!")
-}
 
 #[ntex::main]
 async fn main() -> std::io::Result<()> {
     web::HttpServer::new(|| {
         web::App::new()
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
+            // Allow all origins, methods, request headers and exposed headers allowed. Credentials supported. Max age 1 hour. Does not send wildcard.
+            .wrap(
+                ntex_cors::Cors::new() // <- Construct CORS middleware builder
+                  // By default All origins are allowed !
+                  .max_age(3600)
+                  .finish()
+            )
+            // .service(hello)
+            // .service(echo)
+            // .route("/hey", web::get().to(manual_hello))
+            .service(web::scope("/api")
+                .configure(handler::configure)
+            )
     })
     .bind(("127.0.0.1", 8080))?
     .run()

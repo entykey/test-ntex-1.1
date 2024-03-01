@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 ntex = { version = "1.1", features = ["tokio"] }
+ntex-cors = "1.0.0"
